@@ -13,6 +13,7 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
+    // ApiServiceクラスをインスタンス化
     final ApiService apiService =
         ApiService(Dio(BaseOptions(contentType: "application/json")));
     return Scaffold(
@@ -37,7 +38,7 @@ class _body extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return FutureBuilder(
-      future: apiService.getPosts(),
+      future: apiService.getPosts(),// 自動生成したメソッドを呼び出す
       builder: (context, snapshot) {
         if (snapshot.hasData) {
           final posts = snapshot.data as List<Post>;
