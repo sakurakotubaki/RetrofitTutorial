@@ -1,54 +1,29 @@
-import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
-import 'package:retrofit_app/models/post.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:retrofit_app/service/api_service.dart';
 
-class HomePage extends StatefulWidget {
-  const HomePage({Key? key}) : super(key: key);
+class HomePage extends ConsumerWidget {
+  const HomePage({super.key});
 
   @override
-  State<HomePage> createState() => _HomePageState();
-}
-
-class _HomePageState extends State<HomePage> {
-  @override
-  Widget build(BuildContext context) {
-    // ApiServiceクラスをインスタンス化
-    final ApiService apiService =
-        ApiService(Dio(BaseOptions(contentType: "application/json")));
+  Widget build(BuildContext context, WidgetRef ref) {
+    final apiService = ref.watch(apiFutureProvider);
     return Scaffold(
       appBar: AppBar(
         title: const Text(
-          'Retrofit App',
+          'Retrofit Riverpod',
         ),
       ),
-      body: _body(apiService: apiService),
-    );
-  }
-}
-
-class _body extends StatelessWidget {
-  const _body({
-    super.key,
-    required this.apiService,
-  });
-
-  final ApiService apiService;
-
-  @override
-  Widget build(BuildContext context) {
-    return FutureBuilder(
-      future: apiService.getPosts(),// 自動生成したメソッドを呼び出す
-      builder: (context, snapshot) {
-        if (snapshot.hasData) {
-          final posts = snapshot.data as List<Post>;
+      body: apiService.when(
+        data: (data) {
+          final posts = data;
           return ListView.builder(
             itemCount: posts.length,
             itemBuilder: (context, index) {
               final post = posts[index];
               return Container(
-                margin: EdgeInsets.all(16),
-                padding: EdgeInsets.all(16),
+                margin: const EdgeInsets.all(16),
+                padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(10),
@@ -61,17 +36,17 @@ class _body extends StatelessWidget {
                   children: [
                     Text(
                       post.title,
-                      style: TextStyle(
+                      style: const TextStyle(
                         fontSize: 20,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-                    SizedBox(
+                    const SizedBox(
                       height: 10,
                     ),
                     Text(
                       post.body,
-                      style: TextStyle(
+                      style: const TextStyle(
                         fontSize: 16,
                       ),
                     ),
@@ -80,12 +55,14 @@ class _body extends StatelessWidget {
               );
             },
           );
-        } else {
-          return const Center(
-            child: CircularProgressIndicator(),
-          );
-        }
-      },
+        },
+       error: (e, s) => Center(
+          child: Text(e.toString()),
+        ),
+        loading: () => const Center(
+          child: CircularProgressIndicator(),
+        ),
+        ),
     );
   }
 }
